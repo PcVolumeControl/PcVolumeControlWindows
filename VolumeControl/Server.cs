@@ -57,7 +57,7 @@ namespace VolumeControl
             var bufferedStream = new BufferedStream(clientStream);
             var streamReader = new StreamReader(bufferedStream);
 
-            while (true)
+            while (tcpClient.Connected)
             {
                 string message;
                 try
@@ -73,14 +73,22 @@ namespace VolumeControl
                 }
 
                 // End of message
-                Console.WriteLine("Message received");
-                if(m_clientListener != null)
+                if (message != null)
                 {
-                    m_clientListener.onClientMessage(message);
+                    Console.WriteLine("Message received");
+                    if (m_clientListener != null)
+                    {
+                        m_clientListener.onClientMessage(message);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Message missed, no listener");
+                    }
                 }
                 else
                 {
-                    Console.WriteLine("Message missed, no listener");
+                    Console.WriteLine("No message from client, close socket.");
+                    break;
                 }
             }
 
