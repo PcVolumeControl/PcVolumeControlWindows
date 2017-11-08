@@ -33,7 +33,7 @@ namespace VolumeControl
             {
                 //blocks until a client has connected to the server
                 TcpClient client = this.tcpListener.AcceptTcpClient();
-
+                Console.WriteLine("connection accepted");
                 //create a thread to handle communication 
                 //with connected client
                 Thread clientThread = new Thread(new ParameterizedThreadStart(HandleClientComm));
