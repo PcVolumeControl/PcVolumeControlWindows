@@ -16,6 +16,7 @@ namespace VolumeControl
         private TcpListener tcpListener;
         private Thread listenThread;
         private List<TcpClient> m_clients = new List<TcpClient>();
+        private bool m_running = false;
 
         public Server(ClientListener clientListener)
         {
@@ -25,11 +26,19 @@ namespace VolumeControl
             m_clientListener = clientListener;
         }
 
+        public bool isRunning()
+        {
+            return m_running;
+        }
+
         private void ListenForClients()
         {
             this.tcpListener.Start();
 
-            while (true)
+            m_running = true;
+            m_clientListener.onServerStart();
+
+            while (m_running)
             {
                 //blocks until a client has connected to the server
                 TcpClient client = this.tcpListener.AcceptTcpClient();
@@ -39,6 +48,9 @@ namespace VolumeControl
                 Thread clientThread = new Thread(new ParameterizedThreadStart(HandleClientComm));
                 clientThread.Start(client);
             }
+
+            m_running = false;
+            m_clientListener.onServerEnd();
         }
 
         private void HandleClientComm(object client)
@@ -130,5 +142,8 @@ namespace VolumeControl
     {
         void onClientMessage( string message );
         void onClientConnect();
+
+        void onServerStart();
+        void onServerEnd();
     }
 }

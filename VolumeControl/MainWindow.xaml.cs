@@ -9,12 +9,11 @@ using System.Web.Script.Serialization;
 using Newtonsoft.Json;
 using CSCore.Win32;
 using System.Collections.Generic;
+using System.Net.Sockets;
+using System.Net;
 
 namespace VolumeControl
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window, ClientListener
     {
         MMDeviceEnumerator m_deviceEnumerator;
@@ -39,9 +38,13 @@ namespace VolumeControl
         {
             InitializeComponent();
 
-            m_server = new Server(this);
-
             m_endpointCallback = new EndpointCallback(this);
+
+            string ipAddress = GetLocalIPAddress();
+            server_ip.Content = ipAddress;
+            Console.WriteLine("ipAddress: " + ipAddress);
+
+            updateConnectionStatus();
 
             new Thread(() =>
             {
@@ -54,6 +57,38 @@ namespace VolumeControl
 
                 update(null);
             }).Start();
+        }
+
+        private void updateConnectionStatus()
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                if (m_server == null || !m_server.isRunning())
+                {
+                    server_status.Content = "Offline";
+                    start_button.IsEnabled = true;
+                    server_port.IsEnabled = true;
+                }
+                else
+                {
+                    server_status.Content = "Online";
+                    start_button.IsEnabled = false;
+                    server_port.IsEnabled = false;
+                }
+            }));
+        }
+
+        public static string GetLocalIPAddress()
+        {
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    return ip.ToString();
+                }
+            }
+            throw new Exception("No network adapters with an IPv4 address in the system!");
         }
 
         private class AudioSessionNotificationListener : IAudioSessionNotification
@@ -129,7 +164,7 @@ namespace VolumeControl
                 try
                 {
                     PcAudio audioState = new PcAudio();
-                    AudioDevice audioDevice = new AudioDevice("default");
+                    AudioDevice audioDevice = new AudioDevice(GetDefaultAudioDevice().FriendlyName);
                     audioState.devices.Add(audioDevice);
 
                     foreach (var session in m_audioManager.GetSessionEnumerator())
@@ -166,12 +201,7 @@ namespace VolumeControl
                                         Console.WriteLine("Adjusting volume: " + sessionUpdate.name + " - " + sessionUpdate.volume);
                                         Console.WriteLine("In update?: " + m_updating);
 
-                                        //AudioSessionKeeper keeper = m_sessions[session2.ProcessID];
-                                        //session2.UnregisterAudioSessionNotificationNative(keeper.m_listener);
-
                                         simpleVolume.MasterVolume = sessionUpdate.volume;
-
-                                        //session2.RegisterAudioSessionNotificationNative(keeper.m_listener);
                                     }
                                 }
 
@@ -336,6 +366,16 @@ namespace VolumeControl
             }
         }
 
+        public void onServerStart()
+        {
+            updateConnectionStatus();
+        }
+
+        public void onServerEnd()
+        {
+            updateConnectionStatus();
+        }
+
         public void onClientConnect()
         {
             updateAndDispatchAudioState();
@@ -357,6 +397,11 @@ namespace VolumeControl
             //Console.WriteLine("Sending audio state: " + json);
             Console.WriteLine("Sending audio state");
             m_server.sendData(json);
+        }
+
+        private void start_button_Click(object sender, RoutedEventArgs e)
+        {
+            m_server = new Server(this);
         }
     }
 }
