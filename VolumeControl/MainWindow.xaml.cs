@@ -21,6 +21,7 @@ namespace VolumeControl
         AudioSessionManager2 m_audioManager;
 
         EndpointCallback m_endpointCallback;
+        AudioSessionNotificationListener m_audioSessionListener;
 
         PcAudio m_audioState;
 
@@ -46,17 +47,30 @@ namespace VolumeControl
 
             updateConnectionStatus();
 
+            m_audioSessionListener = new AudioSessionNotificationListener(this);
+
+            m_deviceEnumerator = new MMDeviceEnumerator();
+            m_deviceEnumerator.RegisterEndpointNotificationCallback(m_endpointCallback);
+
             new Thread(() =>
             {
-                m_audioManager = GetDefaultAudioSessionManager2(DataFlow.Render);
-                m_audioManager.RegisterSessionNotificationNative( new AudioSessionNotificationListener( this ) );
-
-                m_deviceEnumerator = new MMDeviceEnumerator();
-                m_defaultDeviceId = GetDefaultAudioDevice().DeviceID;
-                m_deviceEnumerator.RegisterEndpointNotificationCallback(m_endpointCallback);
+                updateDefaultAudioDevice();
 
                 update(null);
             }).Start();
+        }
+
+        private void updateDefaultAudioDevice()
+        {
+            if(m_audioManager != null)
+            {
+                m_audioManager.UnregisterSessionNotificationNative(m_audioSessionListener);
+            }
+
+            m_audioManager = GetDefaultAudioSessionManager2(DataFlow.Render);
+            m_audioManager.RegisterSessionNotificationNative(m_audioSessionListener);
+
+            m_defaultDeviceId = GetDefaultAudioDevice().DeviceID;
         }
 
         private void updateConnectionStatus()
@@ -127,6 +141,7 @@ namespace VolumeControl
 
                     Console.WriteLine("OnDefaultDeviceChanged: " + deviceId);
 
+                    m_mainWindow.updateDefaultAudioDevice();
                     m_mainWindow.m_sessions.Clear();
                     m_mainWindow.updateAndDispatchAudioState();
                 }
@@ -134,17 +149,18 @@ namespace VolumeControl
 
             void IMMNotificationClient.OnDeviceAdded(string deviceId)
             {
-
+                Console.WriteLine("OnDeviceAdded: " + deviceId);
             }
 
             void IMMNotificationClient.OnDeviceRemoved(string deviceId)
             {
-
+                Console.WriteLine("OnDeviceRemoved: " + deviceId);
+                m_mainWindow.updateDefaultAudioDevice();
             }
 
             void IMMNotificationClient.OnDeviceStateChanged(string deviceId, DeviceState deviceState)
             {
-
+                Console.WriteLine("OnDeviceStateChanged: " + deviceId);
             }
 
             void IMMNotificationClient.OnPropertyValueChanged(string deviceId, PropertyKey key)
@@ -174,46 +190,45 @@ namespace VolumeControl
                         var simpleVolume = session.QueryInterface<SimpleAudioVolume>();
                         var audioMeterInformation = session.QueryInterface<AudioMeterInformation>();
                         var session2 = session.QueryInterface<AudioSessionControl2>();
+                        
+                        // If we haven't seen this before, create our book keeper
+                        if (!m_sessions.ContainsKey(session2.ProcessID))
                         {
-                            // If we haven't seen this before, create our book keeper
-                            if (!m_sessions.ContainsKey(session2.ProcessID))
+                            Console.WriteLine("Found new audio session");
+                            AudioSessionListener listener = new AudioSessionListener(this, session2.ProcessID);
+
+                            AudioSessionKeeper sessionKeeper = new AudioSessionKeeper(simpleVolume, audioMeterInformation, session2, listener);
+                            m_sessions.Add(session2.ProcessID, sessionKeeper);
+
+                            session2.RegisterAudioSessionNotificationNative(listener);
+                        }
+
+                        try
+                        {
+                            var process = Process.GetProcessById(session2.ProcessID);
+
+                            Console.WriteLine(process.ProcessName);
+                            Console.WriteLine(audioMeterInformation.PeakValue);
+
+                            if (sessionUpdate != null)
                             {
-                                Console.WriteLine("Found new audio session");
-                                AudioSessionListener listener = new AudioSessionListener(this, session2.ProcessID);
+                                Console.WriteLine("sessionUpdate?: " + (sessionUpdate != null));
 
-                                AudioSessionKeeper sessionKeeper = new AudioSessionKeeper(simpleVolume, audioMeterInformation, session2, listener);
-                                m_sessions.Add(session2.ProcessID, sessionKeeper);
-
-                                session2.RegisterAudioSessionNotificationNative(listener);
-                            }
-
-                            try
-                            {
-                                var process = Process.GetProcessById(session2.ProcessID);
-
-                                Console.WriteLine(process.ProcessName);
-                                Console.WriteLine(audioMeterInformation.PeakValue);
-
-                                if (sessionUpdate != null)
+                                if (sessionUpdate.name.Equals(process.ProcessName, StringComparison.InvariantCultureIgnoreCase))
                                 {
-                                    Console.WriteLine("sessionUpdate?: " + (sessionUpdate != null));
+                                    Console.WriteLine("Adjusting volume: " + sessionUpdate.name + " - " + sessionUpdate.volume);
+                                    Console.WriteLine("In update?: " + m_updating);
 
-                                    if (sessionUpdate.name.Equals(process.ProcessName, StringComparison.InvariantCultureIgnoreCase))
-                                    {
-                                        Console.WriteLine("Adjusting volume: " + sessionUpdate.name + " - " + sessionUpdate.volume);
-                                        Console.WriteLine("In update?: " + m_updating);
-
-                                        simpleVolume.MasterVolume = sessionUpdate.volume;
-                                    }
+                                    simpleVolume.MasterVolume = sessionUpdate.volume;
                                 }
+                            }
 
-                                AudioSession audioSession = new AudioSession(process.ProcessName, simpleVolume.MasterVolume);
-                                audioDevice.sessions.Add(audioSession);
-                            }
-                            catch (Exception e)
-                            {
-                                Console.WriteLine("Proccess in audio session no longer alive");
-                            }
+                            AudioSession audioSession = new AudioSession(process.ProcessName, simpleVolume.MasterVolume);
+                            audioDevice.sessions.Add(audioSession);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("Proccess in audio session no longer alive");
                         }
                     }
 
@@ -301,7 +316,7 @@ namespace VolumeControl
                 }
                 else
                 {
-                    Console.WriteLine("OnSimpleVolumeChanged: skipping update because currently inside update");
+                    //Console.WriteLine("OnSimpleVolumeChanged: skipping update because currently inside update");
                 }
             }
 
