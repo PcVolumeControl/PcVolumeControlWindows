@@ -13,14 +13,14 @@ namespace VolumeControl
     class Server
     {
         private ClientListener m_clientListener;
-        private TcpListener tcpListener;
+        private TcpListener m_tcpListener;
         private Thread listenThread;
         private List<TcpClient> m_clients = new List<TcpClient>();
         private bool m_running = false;
 
         public Server(ClientListener clientListener)
         {
-            this.tcpListener = new TcpListener(IPAddress.Any, 3000);
+            this.m_tcpListener = new TcpListener(IPAddress.Any, 3000);
             this.listenThread = new Thread(new ThreadStart(ListenForClients));
             this.listenThread.Start();
             m_clientListener = clientListener;
@@ -31,9 +31,37 @@ namespace VolumeControl
             return m_running;
         }
 
+        public void stop()
+        {
+            m_running = false;
+
+            m_tcpListener.Stop();
+
+            lock ( this )
+            {
+                foreach (var client in m_clients)
+                {
+                    Console.WriteLine("Closing client connection...");
+
+                    try
+                    {
+                        client.Close();
+                    }
+                    catch (IOException e)
+                    {
+
+                    }
+                    catch (ObjectDisposedException e)
+                    {
+
+                    }
+                }
+            }
+        }
+
         private void ListenForClients()
         {
-            this.tcpListener.Start();
+            this.m_tcpListener.Start();
 
             m_running = true;
             m_clientListener.onServerStart();
@@ -41,12 +69,19 @@ namespace VolumeControl
             while (m_running)
             {
                 //blocks until a client has connected to the server
-                TcpClient client = this.tcpListener.AcceptTcpClient();
-                Console.WriteLine("connection accepted");
-                //create a thread to handle communication 
-                //with connected client
-                Thread clientThread = new Thread(new ParameterizedThreadStart(HandleClientComm));
-                clientThread.Start(client);
+                try
+                {
+                    TcpClient client = this.m_tcpListener.AcceptTcpClient();
+                    Console.WriteLine("connection accepted");
+                    //create a thread to handle communication 
+                    //with connected client
+                    Thread clientThread = new Thread(new ParameterizedThreadStart(HandleClientComm));
+                    clientThread.Start(client);
+                }
+                catch(SocketException e)
+                {
+
+                }
             }
 
             m_running = false;
@@ -65,74 +100,97 @@ namespace VolumeControl
 
             m_clientListener.onClientConnect();
 
-            NetworkStream clientStream = tcpClient.GetStream();
-            var bufferedStream = new BufferedStream(clientStream);
-            var streamReader = new StreamReader(bufferedStream);
-
-            while (tcpClient.Connected)
+            try
             {
-                string message;
-                try
-                {
-                    //blocks until a client sends a message
-                    //bytesRead = clientStream.Read(message, 0, 4096);
-                    message = streamReader.ReadLine();
-                }
-                catch
-                {
-                    //a socket error has occured
-                    break;
-                }
+                NetworkStream clientStream = tcpClient.GetStream();
+                var bufferedStream = new BufferedStream(clientStream);
+                var streamReader = new StreamReader(bufferedStream);
 
-                // End of message
-                if (message != null)
+                while (tcpClient.Connected)
                 {
-                    Console.WriteLine("Message received");
-                    if (m_clientListener != null)
+                    string message;
+                    try
                     {
-                        m_clientListener.onClientMessage(message);
+                        //blocks until a client sends a message
+                        //bytesRead = clientStream.Read(message, 0, 4096);
+                        message = streamReader.ReadLine();
+                    }
+                    catch
+                    {
+                        //a socket error has occured
+                        break;
+                    }
+
+                    // End of message
+                    if (message != null)
+                    {
+                        Console.WriteLine("Message received");
+                        if (m_clientListener != null)
+                        {
+                            m_clientListener.onClientMessage(message);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Message missed, no listener");
+                        }
                     }
                     else
                     {
-                        Console.WriteLine("Message missed, no listener");
+                        Console.WriteLine("No message from client, close socket.");
+                        break;
                     }
                 }
-                else
-                {
-                    Console.WriteLine("No message from client, close socket.");
-                    break;
-                }
             }
-
-            lock (this)
+            catch(InvalidOperationException e)
             {
-                m_clients.Remove(tcpClient);
-            }
-            tcpClient.Close();
 
-            Console.WriteLine("Client disconnected");
+            }
+            finally
+            {
+                lock (this)
+                {
+                    m_clients.Remove(tcpClient);
+                }
+                tcpClient.Close();
+                Console.WriteLine("Client disconnected");
+            }
         }
 
-        public void sendData( string data )
+        public void sendData(string data)
         {
             var finalData = data;
-            if(data != null && data.Length > 0 && data[data.Length-1] != '\n')
+            if (data != null && data.Length > 0 && data[data.Length - 1] != '\n')
             {
                 finalData += '\n';
             }
 
+            List<TcpClient> clients;
             lock (this)
             {
-                foreach (var client in m_clients)
-                {
-                    Console.WriteLine("Sending data to a client...");
+                clients = m_clients.ToList();
+            }
 
+            ASCIIEncoding encoder = new ASCIIEncoding();
+            byte[] buffer = encoder.GetBytes(finalData);
+
+            foreach (var client in clients)
+            {
+                Console.WriteLine("Sending data to a client...");
+
+                try
+                {
                     NetworkStream clientStream = client.GetStream();
-                    ASCIIEncoding encoder = new ASCIIEncoding();
-                    byte[] buffer = encoder.GetBytes(finalData);
 
                     clientStream.Write(buffer, 0, buffer.Length);
                     clientStream.Flush();
+                }
+                catch(IOException e)
+                {
+
+                }
+                catch (ObjectDisposedException e)
+                {
+
                 }
             }
         }

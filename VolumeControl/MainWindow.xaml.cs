@@ -67,12 +67,14 @@ namespace VolumeControl
                 {
                     server_status.Content = "Offline";
                     start_button.IsEnabled = true;
+                    stop_button.IsEnabled = false;
                     server_port.IsEnabled = true;
                 }
                 else
                 {
                     server_status.Content = "Online";
                     start_button.IsEnabled = false;
+                    stop_button.IsEnabled = true;
                     server_port.IsEnabled = false;
                 }
             }));
@@ -393,15 +395,54 @@ namespace VolumeControl
 
         public void dispatchAudioState()
         {
-            var json = JsonConvert.SerializeObject(m_audioState);
-            //Console.WriteLine("Sending audio state: " + json);
-            Console.WriteLine("Sending audio state");
-            m_server.sendData(json);
+            if(m_server != null)
+            {
+                ThreadPool.QueueUserWorkItem(o =>
+                {
+                    var json = JsonConvert.SerializeObject(m_audioState);
+                    //Console.WriteLine("Sending audio state: " + json);
+                    Console.WriteLine("Sending audio state");
+                    m_server.sendData(json);
+                });
+            }
+        }
+
+        public bool stopServer()
+        {
+            bool stopped = false;
+            if (m_server != null)
+            {
+                m_server.stop();
+                m_server = null;
+
+                stopped = true;
+            }
+
+            updateConnectionStatus();
+
+            return stopped;
         }
 
         private void start_button_Click(object sender, RoutedEventArgs e)
         {
             m_server = new Server(this);
+        }
+
+        private void stop_button_Click(object sender, RoutedEventArgs e)
+        {
+            stopServer();
+        }
+
+        private void exit_button_Click(object sender, RoutedEventArgs e)
+        {
+            stopServer();
+
+            System.Windows.Application.Current.Shutdown();
+        }
+
+        private void MainWindow_Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            stopServer();
         }
     }
 }
