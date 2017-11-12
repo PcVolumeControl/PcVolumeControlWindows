@@ -5,17 +5,19 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VolumeControl"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525"
-        Closing="MainWindow_Window_Closing">
+        Title="PcVolumeControl"
+        Height="163.973"
+        Width="525"
+        Closing="MainWindow_Window_Closing" Icon="Resources/WindowIcon.bmp">
     <Grid>
-        <TextBox x:Name="server_port" Height="23" Margin="177,154,220,0" TextWrapping="Wrap" Text="3000" VerticalAlignment="Top"/>
-        <Label Content="Your IP Address" HorizontalAlignment="Right" Margin="0,119,384,0" VerticalAlignment="Top"/>
-        <Label x:Name="server_ip" Content="192.168.1.100" HorizontalAlignment="Right" Margin="0,150,340,0" VerticalAlignment="Top" Width="137"/>
-        <Label Content="Port" HorizontalAlignment="Left" Margin="177,119,0,0" VerticalAlignment="Top"/>
-        <Button x:Name="start_button" Content="Start" Margin="222,199,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="75" Click="start_button_Click"/>
+        <TextBox x:Name="server_port" Height="23" Margin="148,47,249,0" TextWrapping="Wrap" Text="3000" VerticalAlignment="Top"/>
+        <Label Content="Your IP Address" HorizontalAlignment="Right" Margin="0,12,413,0" VerticalAlignment="Top"/>
+        <Label x:Name="server_ip" Content="192.168.1.100" HorizontalAlignment="Right" Margin="0,43,369,0" VerticalAlignment="Top" Width="137"/>
+        <Label Content="Port" HorizontalAlignment="Left" Margin="148,12,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="start_button" Content="Start" Margin="193,92,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="75" Click="start_button_Click"/>
         <Label x:Name="server_status" Content="Offline" Margin="0,21,20,0" HorizontalAlignment="Right" Width="69" Height="26" VerticalAlignment="Top"/>
-        <Button x:Name="stop_button" Content="Stop" HorizontalAlignment="Left" Margin="318,199,0,0" VerticalAlignment="Top" Width="75" Click="stop_button_Click"/>
-        <Button x:Name="exit_button" Content="Exit" HorizontalAlignment="Left" Margin="432,289,0,0" VerticalAlignment="Top" Width="75" Click="exit_button_Click"/>
+        <Button x:Name="stop_button" Content="Stop" HorizontalAlignment="Left" Margin="289,92,0,0" VerticalAlignment="Top" Width="75" Click="stop_button_Click"/>
+        <Button x:Name="exit_button" Content="Exit" HorizontalAlignment="Left" Margin="422,92,0,0" VerticalAlignment="Top" Width="75" Click="exit_button_Click"/>
 
     </Grid>
 </Window>
