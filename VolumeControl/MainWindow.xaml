@@ -8,7 +8,10 @@
         Title="PcVolumeControl"
         Height="163.973"
         Width="525"
-        Closing="MainWindow_Window_Closing" Icon="Resources/WindowIcon.bmp">
+        Closing="MainWindow_Window_Closing" Icon="Resources/WindowIcon.bmp" WindowStyle="ThreeDBorderWindow">
+    <Window.Effect>
+        <DropShadowEffect/>
+    </Window.Effect>
     <Grid>
         <TextBox x:Name="server_port" Height="23" Margin="148,47,249,0" TextWrapping="Wrap" Text="3000" VerticalAlignment="Top"/>
         <Label Content="Your IP Address" HorizontalAlignment="Right" Margin="0,12,413,0" VerticalAlignment="Top"/>
