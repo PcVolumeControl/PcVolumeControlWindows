@@ -96,6 +96,8 @@ namespace VolumeControl
                 updateDefaultAudioDevice();
 
                 update(null);
+
+                m_server = new Server(this);
             }).Start();
         }
 
