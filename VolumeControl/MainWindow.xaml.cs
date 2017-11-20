@@ -18,11 +18,14 @@ using System.Reactive.Linq;
 using System.Text.RegularExpressions;
 using System.Reactive.Subjects;
 using System.Reactive.Concurrency;
+using System.Windows.Navigation;
 
 namespace VolumeControl
 {
     public partial class MainWindow : Window, ClientListener
     {
+        public int VERSION = 1;
+
         MMDeviceEnumerator m_deviceEnumerator;
 
         AudioSessionManager2 m_audioManager;
@@ -54,6 +57,8 @@ namespace VolumeControl
         public MainWindow()
         {
             InitializeComponent();
+
+            version_view.Content = "V " + VERSION;
 
             m_updateListener = new UpdateListener(this);
             m_updateSubject
@@ -92,6 +97,12 @@ namespace VolumeControl
 
                 update(null);
             }).Start();
+        }
+
+        private void DownloadLatest_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
+            e.Handled = true;
         }
 
         private void requestUpdate()
@@ -239,15 +250,15 @@ namespace VolumeControl
                 {
                     m_mainWindow.m_defaultDeviceId = deviceId;
 
-                    //ThreadPool.QueueUserWorkItem(o =>
-                    //{
+                    lock (m_lock)
+                    {
                         Console.WriteLine("OnDefaultDeviceChanged: " + deviceId);
 
                         m_mainWindow.updateDefaultAudioDevice();
                         m_mainWindow.m_sessions.Clear();
 
                         m_mainWindow.requestUpdate();
-                    //});
+                    }
                 }
             }
 
@@ -285,6 +296,7 @@ namespace VolumeControl
                 try
                 {
                     PcAudio audioState = new PcAudio();
+                    audioState.version = VERSION;
 
                     // Add all avalible audio devices to our list of device IDs
                     foreach ( var device in m_deviceEnumerator.EnumAudioEndpoints(DataFlow.Render, CSCore.CoreAudioAPI.DeviceState.Active) )
@@ -472,7 +484,10 @@ namespace VolumeControl
             void IAudioSessionEvents.OnSessionDisconnected(AudioSessionDisconnectReason disconnectReason)
             {
                 Console.WriteLine("OnSessionDisconnected: " + disconnectReason);
-                m_mainWindow.m_sessions.Remove(m_proccessId);
+                lock (m_lock)
+                {
+                    m_mainWindow.m_sessions.Remove(m_proccessId);
+                }
                 m_mainWindow.requestUpdate();
             }
 
@@ -494,7 +509,10 @@ namespace VolumeControl
                 if( newState == AudioSessionState.AudioSessionStateExpired )
                 {
                     Console.WriteLine("OnStateChanged: " + newState);
-                    m_mainWindow.m_sessions.Remove(m_proccessId);
+                    lock (m_lock)
+                    {
+                        m_mainWindow.m_sessions.Remove(m_proccessId);
+                    }
                     m_mainWindow.requestUpdate();
                 }
             }

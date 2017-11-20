@@ -8,6 +8,7 @@ namespace VolumeControl
 {
     class PcAudio
     {
+        public int version;
         public Dictionary<string,string> deviceIds = new Dictionary<string,string>();
         public AudioDevice defaultDevice;
     }
