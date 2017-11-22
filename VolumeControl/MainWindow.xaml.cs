@@ -252,15 +252,12 @@ namespace VolumeControl
                 {
                     m_mainWindow.m_defaultDeviceId = deviceId;
 
-                    lock (m_lock)
-                    {
-                        Console.WriteLine("OnDefaultDeviceChanged: " + deviceId);
+                    Console.WriteLine("OnDefaultDeviceChanged: " + deviceId);
 
-                        m_mainWindow.updateDefaultAudioDevice();
-                        m_mainWindow.m_sessions.Clear();
+                    m_mainWindow.updateDefaultAudioDevice();
+                    m_mainWindow.m_sessions.Clear();
 
-                        m_mainWindow.requestUpdate();
-                    }
+                    m_mainWindow.requestUpdate();
                 }
             }
 
@@ -293,7 +290,7 @@ namespace VolumeControl
         private void update(PcAudio audioUpdate)
         {
             Console.WriteLine("update");
-            lock (m_lock)
+            //lock (m_lock)
             {
                 try
                 {
@@ -486,10 +483,7 @@ namespace VolumeControl
             void IAudioSessionEvents.OnSessionDisconnected(AudioSessionDisconnectReason disconnectReason)
             {
                 Console.WriteLine("OnSessionDisconnected: " + disconnectReason);
-                lock (m_lock)
-                {
-                    m_mainWindow.m_sessions.Remove(m_proccessId);
-                }
+                m_mainWindow.m_sessions.Remove(m_proccessId);
                 m_mainWindow.requestUpdate();
             }
 
@@ -511,10 +505,7 @@ namespace VolumeControl
                 if( newState == AudioSessionState.AudioSessionStateExpired )
                 {
                     Console.WriteLine("OnStateChanged: " + newState);
-                    lock (m_lock)
-                    {
-                        m_mainWindow.m_sessions.Remove(m_proccessId);
-                    }
+                    m_mainWindow.m_sessions.Remove(m_proccessId);
                     m_mainWindow.requestUpdate();
                 }
             }
@@ -566,7 +557,7 @@ namespace VolumeControl
 
         public void onClientConnect()
         {
-            updateAndDispatchAudioState();
+            requestUpdate();
         }
 
         public void updateAndDispatchAudioState()
