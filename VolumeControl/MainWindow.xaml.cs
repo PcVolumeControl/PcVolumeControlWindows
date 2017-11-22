@@ -62,6 +62,7 @@ namespace VolumeControl
 
             m_updateListener = new UpdateListener(this);
             m_updateSubject
+                .Synchronize()
                 .Throttle(TimeSpan.FromMilliseconds(10))
                 .SubscribeOn(NewThreadScheduler.Default)
                 .Subscribe(m_updateListener);
@@ -290,7 +291,7 @@ namespace VolumeControl
         private void update(PcAudio audioUpdate)
         {
             Console.WriteLine("update");
-            //lock (m_lock)
+            lock (m_lock)
             {
                 try
                 {
@@ -320,7 +321,7 @@ namespace VolumeControl
                             {
                                 Console.WriteLine("Updated default audio device: " + audioUpdate.defaultDevice.deviceId);
 
-                                m_coreAudioController.SetDefaultDeviceAsync(newDefaultAudioDevice);
+                                m_coreAudioController.SetDefaultDevice(newDefaultAudioDevice);
                             }
                             else
                             {
