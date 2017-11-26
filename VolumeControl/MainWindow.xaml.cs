@@ -40,7 +40,7 @@ namespace VolumeControl
 
         static Object m_lock = new Object();
 
-        Subject<PcAudio> m_updateSubject = new Subject<PcAudio>();
+        Subject<bool> m_updateSubject = new Subject<bool>();
 
         Dictionary<int, AudioSessionKeeper> m_sessions = new Dictionary<int, AudioSessionKeeper>();
 
@@ -110,7 +110,7 @@ namespace VolumeControl
 
         private void requestUpdate()
         {
-            m_updateSubject.OnNext(null);
+            m_updateSubject.OnNext(true);
         }
 
         private void updateDefaultAudioDevice()
@@ -180,7 +180,7 @@ namespace VolumeControl
             }
         }
 
-        private class UpdateListener : IObserver<PcAudio>
+        private class UpdateListener : IObserver<bool>
         {
             private MainWindow m_mainWindow;
 
@@ -199,16 +199,9 @@ namespace VolumeControl
                 Console.WriteLine("OnError");
             }
 
-            public void OnNext(PcAudio updateValue)
+            public void OnNext(bool value)
             {
-                if(updateValue == null)
-                {
-                    m_mainWindow.updateAndDispatchAudioState();
-                }
-                else
-                {
-                    m_mainWindow.updateState(updateValue);
-                }
+                m_mainWindow.updateAndDispatchAudioState();
             }
         }
 
@@ -599,8 +592,7 @@ namespace VolumeControl
                 {
                     Console.WriteLine("client message: " + message);
                     var pcAudio = JsonConvert.DeserializeObject<PcAudio>(message, m_jsonsettings);
-                    //update(pcAudio);
-                    m_updateSubject.OnNext(pcAudio);
+                    updateState(pcAudio);
                 });
             }
         }
