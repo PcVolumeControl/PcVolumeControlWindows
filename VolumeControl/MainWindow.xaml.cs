@@ -24,7 +24,7 @@ namespace VolumeControl
 {
     public partial class MainWindow : Window, ClientListener
     {
-        public int VERSION = 1;
+        public int VERSION = 2;
 
         MMDeviceEnumerator m_deviceEnumerator;
 
