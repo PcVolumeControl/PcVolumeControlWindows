@@ -24,7 +24,7 @@ namespace VolumeControl
 {
     public partial class MainWindow : Window, ClientListener
     {
-        public int VERSION = 2;
+        public int VERSION = 3;
 
         MMDeviceEnumerator m_deviceEnumerator;
 
@@ -125,7 +125,7 @@ namespace VolumeControl
             m_audioManager = GetDefaultAudioSessionManager2(DataFlow.Render);
             m_audioManager.RegisterSessionNotificationNative(m_audioSessionListener);
 
-            m_defaultDeviceId = GetDefaultAudioDevice().DeviceID;
+            m_defaultDeviceId = GetDefaultAudioDeviceId();
         }
 
         private void updateConnectionStatus()
@@ -250,26 +250,23 @@ namespace VolumeControl
             {
                 if (!deviceId.Equals(m_mainWindow.m_defaultDeviceId))
                 {
-                    m_mainWindow.m_defaultDeviceId = deviceId;
-
                     Console.WriteLine("OnDefaultDeviceChanged: " + deviceId);
 
-                    m_mainWindow.updateDefaultAudioDevice();
-                    m_mainWindow.m_sessions.Clear();
-
-                    m_mainWindow.requestUpdate();
+                    updateDevices();
                 }
             }
 
             void IMMNotificationClient.OnDeviceAdded(string deviceId)
             {
                 Console.WriteLine("OnDeviceAdded: " + deviceId);
+
                 m_mainWindow.requestUpdate();
             }
 
             void IMMNotificationClient.OnDeviceRemoved(string deviceId)
             {
                 Console.WriteLine("OnDeviceRemoved: " + deviceId);
+
                 m_mainWindow.requestUpdate();
             }
 
@@ -285,13 +282,26 @@ namespace VolumeControl
                     Console.WriteLine("OnPropertyValueChanged: " + deviceId + " Property: " + key);
                 }
             }
+
+            private void updateDevices()
+            {
+                lock (m_lock)
+                {
+                    m_mainWindow.updateDefaultAudioDevice();
+                    foreach (var sessionKeeper in m_mainWindow.m_sessions)
+                    {
+                        sessionKeeper.Value.Dispose();
+                    }
+                    m_mainWindow.m_sessions.Clear();
+                }
+
+                m_mainWindow.requestUpdate();
+            }
         }
 
         private void updateState(PcAudio audioUpdate)
         {
             Console.WriteLine("update");
-
-            Console.WriteLine("Update on threadId:{0}", Thread.CurrentThread.ManagedThreadId);
 
             lock (m_lock)
             {
@@ -390,7 +400,7 @@ namespace VolumeControl
                             // Go through all audio sessions
                             foreach (var session in sessionEnumerator)
                             {
-                                Console.WriteLine("session...");
+                                //Console.WriteLine("session...");
 
                                 var simpleVolume = session.QueryInterface<SimpleAudioVolume>();
                                 var audioMeterInformation = session.QueryInterface<AudioMeterInformation>();
@@ -404,15 +414,13 @@ namespace VolumeControl
 
                                     AudioSessionKeeper sessionKeeper = new AudioSessionKeeper(simpleVolume, audioMeterInformation, session2, listener);
                                     m_sessions.Add(session2.ProcessID, sessionKeeper);
-
-                                    session2.RegisterAudioSessionNotificationNative(listener);
                                 }
 
                                 try
                                 {
                                     var process = Process.GetProcessById(session2.ProcessID);
 
-                                    Console.WriteLine(process.ProcessName);
+                                    //Console.WriteLine(process.ProcessName);
                                     //Console.WriteLine(audioMeterInformation.PeakValue);
 
                                     // Audio session update
@@ -451,7 +459,6 @@ namespace VolumeControl
                                     Console.WriteLine("Proccess in audio session no longer alive");
 
                                     AudioSessionKeeper sessionKeeper = m_sessions[session2.ProcessID];
-                                    session2.UnregisterAudioSessionNotificationNative(sessionKeeper.m_listener);
                                     m_sessions.Remove(session2.ProcessID);
                                     sessionKeeper.Dispose();
 
@@ -472,6 +479,8 @@ namespace VolumeControl
 
         private class AudioSessionKeeper : IDisposable
         {
+            private bool disposed = false;
+
             SimpleAudioVolume m_simpleAudioVolume;
             AudioMeterInformation m_audioMeterInformation;
             public AudioSessionControl2 m_session2;
@@ -486,13 +495,34 @@ namespace VolumeControl
                 m_audioMeterInformation = audioMeterInformation;
                 m_session2 = session2;
                 m_listener = listener;
+
+                m_session2.RegisterAudioSessionNotificationNative(m_listener);
             }
 
             public void Dispose()
             {
-                m_simpleAudioVolume.Dispose();
-                m_audioMeterInformation.Dispose();
-                m_session2.Dispose();
+                Dispose(true);
+                GC.SuppressFinalize(this);
+            }
+
+            ~AudioSessionKeeper()
+            {
+                Dispose(false);
+            }
+
+            protected virtual void Dispose(bool disposing)
+            {
+                if (!disposed)
+                {
+                    if (disposing)
+                    {
+                        m_session2.UnregisterAudioSessionNotificationNative(m_listener);
+
+                        m_session2.Dispose();
+                    }
+
+                    disposed = true;
+                }
             }
         }
 
@@ -535,7 +565,7 @@ namespace VolumeControl
             void IAudioSessionEvents.OnSessionDisconnected(AudioSessionDisconnectReason disconnectReason)
             {
                 Console.WriteLine("OnSessionDisconnected: " + disconnectReason);
-                m_mainWindow.m_sessions.Remove(m_proccessId);
+                removeAudioSession();
                 m_mainWindow.requestUpdate();
             }
 
@@ -557,8 +587,18 @@ namespace VolumeControl
                 if( newState == AudioSessionState.AudioSessionStateExpired )
                 {
                     Console.WriteLine("OnStateChanged: " + newState);
-                    m_mainWindow.m_sessions.Remove(m_proccessId);
+                    removeAudioSession();
                     m_mainWindow.requestUpdate();
+                }
+            }
+
+            private void removeAudioSession()
+            {
+                var audioSession = m_mainWindow.m_sessions[m_proccessId];
+                m_mainWindow.m_sessions.Remove(m_proccessId);
+                if (audioSession != null)
+                {
+                    audioSession.Dispose();
                 }
             }
         }
@@ -568,6 +608,17 @@ namespace VolumeControl
             using (var enumerator = new MMDeviceEnumerator())
             {
                 return enumerator.GetDefaultAudioEndpoint(DataFlow.Render, CSCore.CoreAudioAPI.Role.Multimedia);
+            }
+        }
+
+        private static string GetDefaultAudioDeviceId()
+        {
+            using (var enumerator = new MMDeviceEnumerator())
+            {
+                using (var device = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, CSCore.CoreAudioAPI.Role.Multimedia))
+                {
+                    return device.DeviceID;
+                }
             }
         }
 
