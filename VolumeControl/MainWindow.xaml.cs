@@ -24,7 +24,7 @@ namespace VolumeControl
 {
     public partial class MainWindow : Window, ClientListener
     {
-        public int VERSION = 3;
+        public static int VERSION = 3;
 
         MMDeviceEnumerator m_deviceEnumerator;
 
@@ -635,15 +635,32 @@ namespace VolumeControl
             }
         }
 
-        public void onClientMessage(string message)
+        public void onClientMessage(string message, TcpClient tcpClient)
         {
             if(message != null)
             {
                 ThreadPool.QueueUserWorkItem(o =>
                 {
-                    Console.WriteLine("client message: " + message);
-                    var pcAudio = JsonConvert.DeserializeObject<PcAudio>(message, m_jsonsettings);
-                    updateState(pcAudio);
+                    try
+                    {
+                        Console.WriteLine("client message: " + message);
+                        var pcAudio = JsonConvert.DeserializeObject<PcAudio>(message, m_jsonsettings);
+
+                        if(VERSION == pcAudio.version)
+                        {
+                            updateState(pcAudio);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Bad version from client. Dropping client.");
+                            tcpClient.Close();
+                        }
+                    }
+                    catch(JsonException e)
+                    {
+                        Console.WriteLine("Bad message from client. Dropping client.");
+                        tcpClient.Close();
+                    }
                 });
             }
         }

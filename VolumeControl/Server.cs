@@ -127,7 +127,7 @@ namespace VolumeControl
                         Console.WriteLine("Message received");
                         if (m_clientListener != null)
                         {
-                            m_clientListener.onClientMessage(message);
+                            m_clientListener.onClientMessage(message, tcpClient);
                         }
                         else
                         {
@@ -198,7 +198,7 @@ namespace VolumeControl
 
     interface ClientListener
     {
-        void onClientMessage( string message );
+        void onClientMessage( string message, TcpClient tcpClient);
         void onClientConnect();
 
         void onServerStart();
