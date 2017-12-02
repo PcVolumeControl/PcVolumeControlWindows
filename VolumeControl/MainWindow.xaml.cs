@@ -1,23 +1,15 @@
-﻿using CSCore.CoreAudioAPI;
-using System;
-using System.Collections.ObjectModel;
+﻿using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
-using System.Web.Script.Serialization;
 using Newtonsoft.Json;
-using CSCore.Win32;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Net;
 using AudioSwitcher.AudioApi.CoreAudio;
-using AudioSwitcher.AudioApi.Observables;
 using AudioSwitcher.AudioApi;
 using System.Reactive.Linq;
-using System.Text.RegularExpressions;
 using System.Reactive.Subjects;
-using System.Reactive.Concurrency;
 using System.Windows.Navigation;
 using AudioSwitcher.AudioApi.Session;
 
@@ -35,7 +27,10 @@ namespace VolumeControl
         private UpdateListener m_updateListener;
         private Dictionary<string, AudioSessionKeeper> m_sessions = new Dictionary<string, AudioSessionKeeper>();
 
-        Subject<bool> m_updateSubject = new Subject<bool>();
+        private AudioSessionVolumeListener m_sessionVolumeListener;
+        private AudioSessionMuteListener m_sessionMuteListener;
+
+        private Subject<bool> m_updateSubject = new Subject<bool>();
 
         JsonSerializerSettings m_jsonsettings = new JsonSerializerSettings
         {
@@ -60,6 +55,9 @@ namespace VolumeControl
             server_ip.Content = ipAddress;
             Console.WriteLine("ipAddress: " + ipAddress);
 
+            m_sessionVolumeListener = new AudioSessionVolumeListener(this);
+            m_sessionMuteListener = new AudioSessionMuteListener(this);
+
             updateConnectionStatus();
 
             m_coreAudioController = new CoreAudioController();
@@ -71,11 +69,11 @@ namespace VolumeControl
             MasterVolumeListener masterVolumeListener = new MasterVolumeListener(this);
 
             m_coreAudioController.DefaultPlaybackDevice.VolumeChanged
-                                .Throttle(TimeSpan.FromMilliseconds(100))
+                                //.Throttle(TimeSpan.FromMilliseconds(10))
                                 .Subscribe(masterVolumeListener);
 
             m_coreAudioController.DefaultPlaybackDevice.MuteChanged
-                                .Throttle(TimeSpan.FromMilliseconds(100))
+                                //.Throttle(TimeSpan.FromMilliseconds(10))
                                 .Subscribe(masterVolumeListener);
 
             new Thread(() =>
@@ -99,7 +97,7 @@ namespace VolumeControl
 
         private void updateConnectionStatus()
         {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 if (m_server == null || !m_server.isRunning())
                 {
@@ -193,13 +191,11 @@ namespace VolumeControl
                     PcAudio audioState = new PcAudio();
                     audioState.version = VERSION;
 
-                    Console.WriteLine("Scrapping device IDs");
-
                     cleanUpSessionKeepers();
 
                     var defaultDevice = m_coreAudioController.GetDefaultDevice(DeviceType.Playback, AudioSwitcher.AudioApi.Role.Multimedia);
                     string defaultDeviceId = defaultDevice.Id.ToString();
-
+                    
                     // Add all avalible audio devices to our list of device IDs
                     IEnumerable<CoreAudioDevice> devices = m_coreAudioController.GetPlaybackDevices();
                     foreach (var device in devices)
@@ -210,20 +206,13 @@ namespace VolumeControl
                         }
                     }
 
-                    Console.WriteLine("Done scrapping device IDs");
-
                     // Master device updates
                     if (audioUpdate != null && audioUpdate.defaultDevice != null)
                     {
-                        Console.WriteLine("Has default device");
-
                         if (!audioUpdate.defaultDevice.deviceId.Equals(defaultDeviceId))
                         {
-                            Console.WriteLine("Audio update default device change request");
-
                             Guid deviceId = Guid.Parse(audioUpdate.defaultDevice.deviceId);
                             
-                            Console.WriteLine("About to get new default device");
                             CoreAudioDevice newDefaultAudioDevice = m_coreAudioController.GetDevice(deviceId);
                             if (newDefaultAudioDevice != null)
                             {
@@ -244,7 +233,6 @@ namespace VolumeControl
                             {
                                 if (audioUpdate.defaultDevice.masterMuted != null)
                                 {
-                                    Console.WriteLine("Getting current mute state");
                                     bool muted = audioUpdate.defaultDevice.masterMuted ?? m_coreAudioController.DefaultPlaybackDevice.IsMuted;
                                     Console.WriteLine("Updating master mute: " + muted);
 
@@ -253,11 +241,10 @@ namespace VolumeControl
 
                                 if (audioUpdate.defaultDevice.masterVolume != null)
                                 {
-                                    Console.WriteLine("Getting current volume");
                                     float volume = audioUpdate.defaultDevice.masterVolume ?? (float)m_coreAudioController.DefaultPlaybackDevice.Volume;
                                     Console.WriteLine("Updating master volume: " + volume);
 
-                                    m_coreAudioController.DefaultPlaybackDevice.Volume = volume * 100;
+                                    m_coreAudioController.DefaultPlaybackDevice.Volume = volume;
                                 }
 
                                 return;
@@ -265,19 +252,13 @@ namespace VolumeControl
                         }
                     }
 
-                    Console.WriteLine("Creating new device data");
-
                     // Create our default audio device and populate it's volume and mute status
                     AudioDevice audioDevice = new AudioDevice(defaultDevice.FullName, defaultDeviceId);
                     audioState.defaultDevice = audioDevice;
 
-                    Console.WriteLine("Creating new device data");
-
                     CoreAudioDevice defaultPlaybackDevice = m_coreAudioController.DefaultPlaybackDevice;
                     audioDevice.masterVolume = (float)defaultPlaybackDevice.Volume;
                     audioDevice.masterMuted = defaultPlaybackDevice.IsMuted;
-
-                    Console.WriteLine("Iterating sessions");
 
                     // Go through all audio sessions
                     foreach (var session in defaultDevice.SessionController.All())
@@ -288,9 +269,9 @@ namespace VolumeControl
                             string sessionId = session.Id.ToString();
                             if (!m_sessions.ContainsKey(sessionId))
                             {
-                                Console.WriteLine("Found new audio session");
+                                //Console.WriteLine("Found new audio session");
 
-                                AudioSessionKeeper sessionKeeper = new AudioSessionKeeper(session, this);
+                                AudioSessionKeeper sessionKeeper = new AudioSessionKeeper(session, m_sessionVolumeListener, m_sessionMuteListener);
                                 m_sessions.Add(session.Id, sessionKeeper);
                             }
 
@@ -325,8 +306,10 @@ namespace VolumeControl
                                 string sessionName = session.DisplayName;
                                 if (sessionName == null || sessionName.Trim() == "")
                                 {
-                                    var process = Process.GetProcessById(session.ProcessId);
-                                    sessionName = process.ProcessName;
+                                    using (var process = Process.GetProcessById(session.ProcessId))
+                                    {
+                                        sessionName = process.ProcessName;
+                                    }
                                 }
 
                                 AudioSession audioSession = new AudioSession(sessionName, (float)session.Volume, session.IsMuted);
@@ -341,8 +324,6 @@ namespace VolumeControl
                                 AudioSessionKeeper sessionKeeper = m_sessions[session.Id];
                                 m_sessions.Remove(session.Id);
                                 sessionKeeper.Dispose();
-
-                                Console.WriteLine("Done cleaning up");
                             }
                         }
                     }

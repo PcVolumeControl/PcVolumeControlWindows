@@ -6,7 +6,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace VolumeControl
 {
@@ -17,6 +16,7 @@ namespace VolumeControl
         private Thread listenThread;
         private List<TcpClient> m_clients = new List<TcpClient>();
         private bool m_running = false;
+        private ASCIIEncoding m_encoder = new ASCIIEncoding();
 
         public Server(ClientListener clientListener)
         {
@@ -171,8 +171,7 @@ namespace VolumeControl
                 clients = m_clients.ToList();
             }
 
-            ASCIIEncoding encoder = new ASCIIEncoding();
-            byte[] buffer = encoder.GetBytes(finalData);
+            byte[] buffer = m_encoder.GetBytes(finalData);
 
             foreach (var client in clients)
             {
