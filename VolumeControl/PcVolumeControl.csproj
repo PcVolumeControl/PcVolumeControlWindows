@@ -137,6 +137,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AudioData.cs" />
+    <Compile Include="AudioSessionKeeper.cs" />
+    <Compile Include="Listeners.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>

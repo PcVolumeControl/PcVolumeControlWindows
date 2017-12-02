@@ -20,9 +20,9 @@ namespace VolumeControl
 
         public Server(ClientListener clientListener)
         {
-            this.m_tcpListener = new TcpListener(IPAddress.Any, 3000);
-            this.listenThread = new Thread(new ThreadStart(ListenForClients));
-            this.listenThread.Start();
+            m_tcpListener = new TcpListener(IPAddress.Any, 3000);
+            listenThread = new Thread(new ThreadStart(ListenForClients));
+            listenThread.Start();
             m_clientListener = clientListener;
         }
 
@@ -71,7 +71,7 @@ namespace VolumeControl
                 //blocks until a client has connected to the server
                 try
                 {
-                    TcpClient client = this.m_tcpListener.AcceptTcpClient();
+                    TcpClient client = m_tcpListener.AcceptTcpClient();
                     Console.WriteLine("connection accepted");
                     //create a thread to handle communication 
                     //with connected client
@@ -152,6 +152,7 @@ namespace VolumeControl
                     m_clients.Remove(tcpClient);
                 }
                 tcpClient.Close();
+                tcpClient.Dispose();
                 Console.WriteLine("Client disconnected");
             }
         }
