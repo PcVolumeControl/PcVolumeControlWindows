@@ -9,7 +9,7 @@ The client should open a raw TCP connection that will be used to exchange JSON s
 When a client first connects it will receive an initial update on the state of the PC's audio systems.
 
 _Example of the full state update sent by the server:_
-~~~~
+```json
 {
     "version": 4,
     "deviceIds": {
@@ -50,7 +50,7 @@ _Example of the full state update sent by the server:_
         ]
     }
 }
-~~~~
+```
 
 The client will continue getting these full state updates until it disconnects.
 
@@ -70,20 +70,20 @@ If the client receives an update from the server with a mismatching version, it 
 
 ## Change the default audio device
 All that is required is sending the `defaultDevice` block with the new deviceId:
-~~~~
+```json
 {
     "defaultDevice": {
         "deviceId": "0f4090a9-dee2-4563-ba29-0ad6b93d9e22"
     },
     "version": 5
 }
-~~~~
+```
 
 ## Change the volume or mute state of the current default device
 Identify the current default device with it's device ID, and send the new volume and mute values you would like it to reflect.
 
 You can send one or both volume or mute.
-~~~~
+```json
 {
     "defaultDevice": {
         "deviceId": "c98e4030-926b-4e62-8c83-1c529574cc51",
@@ -92,11 +92,11 @@ You can send one or both volume or mute.
     },
     "version": 5
 }
-~~~~
+```
 
 ## Change the volume or mute state of a given audio session on the current default device
 _Note: Both Volume AND Mute MUST be provided in session updates!_
-~~~~
+```json
 {
     "defaultDevice": {
         "deviceId": "c98e4030-926b-4e62-8c83-1c529574cc51",
@@ -110,4 +110,4 @@ _Note: Both Volume AND Mute MUST be provided in session updates!_
     },
     "version": 5
 }
-~~~~
+```
