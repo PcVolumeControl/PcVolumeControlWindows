@@ -27,12 +27,14 @@ namespace VolumeControl
     class AudioSession
     {
         public string name;
+        public string id;
         public float volume;
         public bool muted;
 
-        public AudioSession(string name, float volume, bool muted)
+        public AudioSession(string name, string id, float volume, bool muted)
         {
             this.name = name;
+            this.id = id;
             this.volume = volume;
             this.muted = muted;
         }

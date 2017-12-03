@@ -17,7 +17,7 @@ namespace VolumeControl
 {
     public partial class MainWindow : Window, ClientListener
     {
-        public static int VERSION = 4;
+        public static int VERSION = 5;
         private static Object m_lock = new Object();
 
         private CoreAudioController m_coreAudioController;
@@ -290,7 +290,7 @@ namespace VolumeControl
                                                 {
                                                     Console.WriteLine("sessionUpdate?: " + (audioUpdate != null));
 
-                                                    if (sessionUpdate.name.Equals(session.DisplayName, StringComparison.InvariantCultureIgnoreCase))
+                                                    if (sessionUpdate.id.Equals(session.Id))
                                                     {
                                                         Console.WriteLine("Adjusting volume: " + sessionUpdate.name + " - " + sessionUpdate.volume);
                                                         Console.WriteLine("Adjusting mute: " + sessionUpdate.muted + " - " + sessionUpdate.muted);
@@ -314,7 +314,7 @@ namespace VolumeControl
                                         }
                                     }
 
-                                    AudioSession audioSession = new AudioSession(sessionName, (float)session.Volume, session.IsMuted);
+                                    AudioSession audioSession = new AudioSession(sessionName, session.Id, (float)session.Volume, session.IsMuted);
                                     audioDevice.sessions.Add(audioSession);
                                 }
                                 catch (Exception e)
