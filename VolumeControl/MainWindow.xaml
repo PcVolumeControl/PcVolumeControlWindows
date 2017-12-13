@@ -23,7 +23,7 @@
         <Button x:Name="exit_button" Content="Exit" HorizontalAlignment="Left" Margin="422,92,0,0" VerticalAlignment="Top" Width="75" Click="exit_button_Click"/>
         <Label x:Name="version_view" Content="V" Margin="0,0,0,18" HorizontalAlignment="Left" Width="69" Height="26" VerticalAlignment="Bottom"/>
         <TextBlock VerticalAlignment="Bottom" HorizontalAlignment="Left">
-            <Hyperlink RequestNavigate="DownloadLatest_RequestNavigate" NavigateUri="http://darkrockstudios.com/files/PcVolumeControl.zip">Download latest Version</Hyperlink>
+            <Hyperlink RequestNavigate="DownloadLatest_RequestNavigate" NavigateUri="https://github.com/PcVolumeControl/PcVolumeControlWindows/releases/latest">Download latest Version</Hyperlink>
         </TextBlock>
     </Grid>
 </Window>
