@@ -4,7 +4,7 @@ This is the Windows component of the PcVolumeControl project. It is the server t
 # Client/Server Protocol
 The protocol for interacting with the Windows server is as follows:
 
-The client should open a raw TCP connection that will be used to exchange JSON strings.
+The client should open a raw TCP connection that will be used to exchange JSON strings terminated by a new line character.
 
 When a client first connects it will receive an initial update on the state of the PC's audio systems.
 
