@@ -17,7 +17,7 @@ namespace VolumeControl
 {
     public partial class MainWindow : Window, ClientListener
     {
-        public static int VERSION = 5;
+        public static int VERSION = 6;
         private static Object m_lock = new Object();
 
         private CoreAudioController m_coreAudioController;
@@ -358,6 +358,8 @@ namespace VolumeControl
                         if(VERSION == pcAudio.version)
                         {
                             updateState(pcAudio);
+                            // Update all clients to the new state
+                            dispatchAudioState();
                         }
                         else
                         {
@@ -391,7 +393,6 @@ namespace VolumeControl
 
         public void updateAndDispatchAudioState()
         {
-            Console.WriteLine("updateAndDispatchAudioState()");
             updateState(null);
 
             if (m_audioState != null)
