@@ -8,10 +8,14 @@ The client should open a raw TCP connection that will be used to exchange JSON s
 
 When a client first connects it will receive an initial update on the state of the PC's audio systems.
 
+The client will continue receiving updates as the state of the PC's volume systems change.
+
+When a client sends a request to update, if it is successful, the server will respond with the newly updated full state.
+
 _Example of the full state update sent by the server:_
 ```json
 {
-    "version": 4,
+    "version": 6,
     "deviceIds": {
         "0f4090a9-dee2-4563-ba29-0ad6b93d9e22": "Speakers (Realtek High Definition Audio)",
         "c5a32106-264d-40b2-a2e0-74eda397454c": "Headphones (Rift Audio)",
@@ -75,7 +79,7 @@ All that is required is sending the `defaultDevice` block with the new deviceId:
     "defaultDevice": {
         "deviceId": "0f4090a9-dee2-4563-ba29-0ad6b93d9e22"
     },
-    "version": 5
+    "version": 6
 }
 ```
 
@@ -90,7 +94,7 @@ You can send one or both volume or mute.
         "masterMuted": true,
         "masterVolume": 95.0
     },
-    "version": 5
+    "version": 6
 }
 ```
 
@@ -108,6 +112,6 @@ _Note: Both Volume AND Mute MUST be provided in session updates!_
             }
         ]
     },
-    "version": 5
+    "version": 6
 }
 ```
