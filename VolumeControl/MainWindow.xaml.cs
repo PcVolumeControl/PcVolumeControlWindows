@@ -180,7 +180,7 @@ namespace VolumeControl
             }
         }
 
-        private void updateState(PcAudio audioUpdate)
+        private bool updateState(PcAudio audioUpdate)
         {
             Console.WriteLine("update");
 
@@ -222,7 +222,8 @@ namespace VolumeControl
 
                                     m_coreAudioController.SetDefaultDevice(newDefaultAudioDevice);
                                     m_coreAudioController.SetDefaultCommunicationsDevice(newDefaultAudioDevice);
-                                    return;
+
+                                    return false;
                                 }
                                 else
                                 {
@@ -249,7 +250,7 @@ namespace VolumeControl
                                         m_coreAudioController.DefaultPlaybackDevice.Volume = volume;
                                     }
 
-                                    return;
+                                    return false;
                                 }
                             }
                         }
@@ -342,6 +343,8 @@ namespace VolumeControl
                     Console.WriteLine("Update complete!");
                 }
             }
+
+            return true;
         }
 
         public void onClientMessage(string message, TcpClient tcpClient)
@@ -357,9 +360,11 @@ namespace VolumeControl
 
                         if(VERSION == pcAudio.version)
                         {
-                            updateState(pcAudio);
-                            // Update all clients to the new state
-                            dispatchAudioState();
+                            if (updateState(pcAudio))
+                            {
+                                // Update all clients to the new state
+                                dispatchAudioState();
+                            }
                         }
                         else
                         {
