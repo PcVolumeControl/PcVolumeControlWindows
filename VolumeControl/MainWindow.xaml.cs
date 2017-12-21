@@ -360,11 +360,7 @@ namespace VolumeControl
 
                         if(VERSION == pcAudio.version)
                         {
-                            if (updateState(pcAudio))
-                            {
-                                // Update all clients to the new state
-                                dispatchAudioState();
-                            }
+                            updateState(pcAudio);
                         }
                         else
                         {
