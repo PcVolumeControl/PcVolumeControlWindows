@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace VolumeControl
 {
-    class Server
+    public class Server
     {
         private ClientListener m_clientListener;
         private TcpListener m_tcpListener;
@@ -196,7 +196,7 @@ namespace VolumeControl
         }
     }
 
-    interface ClientListener
+    public interface ClientListener
     {
         void onClientMessage( string message, TcpClient tcpClient);
         void onClientConnect();

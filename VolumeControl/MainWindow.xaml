@@ -8,7 +8,8 @@
         Title="PcVolumeControl"
         Height="163.973"
         Width="525"
-        Closing="MainWindow_Window_Closing" Icon="Resources/WindowIcon.bmp" WindowStyle="ThreeDBorderWindow">
+        Icon="Resources/WindowIcon.bmp"
+        WindowStyle="ThreeDBorderWindow">
     <Window.Effect>
         <DropShadowEffect/>
     </Window.Effect>

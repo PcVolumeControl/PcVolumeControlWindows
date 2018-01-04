@@ -1279,7 +1279,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_96D278E201924D8F8D019951CA3956C1"
             {
-            "SourcePath" = "8:..\\VolumeControl\\obj\\Release\\PcVolumeControl.exe"
+            "SourcePath" = "8:..\\VolumeControl\\obj\\Debug\\PcVolumeControl.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_01770CE3905B4B09AB8A1EA22D21FBA8"

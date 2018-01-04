@@ -6,11 +6,11 @@ namespace VolumeControl
 {
     public class AudioSessionRemovedListener : IObserver<string>
     {
-        private MainWindow m_mainWindow;
+        private App m_app;
 
-        public AudioSessionRemovedListener(MainWindow mainWindow)
+        public AudioSessionRemovedListener(App app)
         {
-            m_mainWindow = mainWindow;
+            m_app = app;
         }
 
         public void OnCompleted()
@@ -25,17 +25,17 @@ namespace VolumeControl
 
         public void OnNext(string sessionId)
         {
-            m_mainWindow.requestUpdate();
+            m_app.requestUpdate();
         }
     }
 
     public class AudioSessionAddedListener : IObserver<IAudioSession>
     {
-        private MainWindow m_mainWindow;
+        private App m_app;
 
-        public AudioSessionAddedListener(MainWindow mainWindow)
+        public AudioSessionAddedListener(App app)
         {
-            m_mainWindow = mainWindow;
+            m_app = app;
         }
 
         public void OnCompleted()
@@ -50,17 +50,17 @@ namespace VolumeControl
 
         public void OnNext(IAudioSession session)
         {
-            m_mainWindow.requestUpdate();
+            m_app.requestUpdate();
         }
     }
 
     public class DeviceChangeListener : IObserver<DeviceChangedArgs>
     {
-        private MainWindow m_mainWindow;
+        private App m_app;
 
-        public DeviceChangeListener(MainWindow mainWindow)
+        public DeviceChangeListener(App app)
         {
-            m_mainWindow = mainWindow;
+            m_app = app;
         }
 
         public void OnCompleted()
@@ -78,26 +78,26 @@ namespace VolumeControl
             switch (value.ChangedType)
             {
                 case DeviceChangedType.DefaultChanged:
-                    m_mainWindow.requestUpdate();
+                    m_app.requestUpdate();
                     break;
                 case DeviceChangedType.DeviceAdded:
-                    m_mainWindow.requestUpdate();
+                    m_app.requestUpdate();
                     break;
                 case DeviceChangedType.DeviceRemoved:
-                    m_mainWindow.requestUpdate();
+                    m_app.requestUpdate();
                     break;
                 case DeviceChangedType.PropertyChanged:
                     break;
                 case DeviceChangedType.StateChanged:
                     break;
                 case DeviceChangedType.MuteChanged:
-                    m_mainWindow.requestUpdate();
+                    m_app.requestUpdate();
                     break;
                 case DeviceChangedType.VolumeChanged:
-                    m_mainWindow.requestUpdate();
+                    m_app.requestUpdate();
                     break;
                 case DeviceChangedType.PeakValueChanged:
-                    m_mainWindow.requestUpdate();
+                    m_app.requestUpdate();
                     break;
             }
         }
@@ -105,11 +105,11 @@ namespace VolumeControl
 
     public class AudioSessionVolumeListener : IObserver<SessionVolumeChangedArgs>
     {
-        private MainWindow m_mainWindow;
+        private App m_app;
 
-        public AudioSessionVolumeListener(MainWindow mainWindow)
+        public AudioSessionVolumeListener(App app)
         {
-            m_mainWindow = mainWindow;
+            m_app = app;
         }
 
         public void OnCompleted()
@@ -124,17 +124,17 @@ namespace VolumeControl
 
         public void OnNext(SessionVolumeChangedArgs args)
         {
-            m_mainWindow.requestUpdate();
+            m_app.requestUpdate();
         }
     }
 
     public class AudioSessionMuteListener : IObserver<SessionMuteChangedArgs>
     {
-        private MainWindow m_mainWindow;
+        private App m_app;
 
-        public AudioSessionMuteListener(MainWindow mainWindow)
+        public AudioSessionMuteListener(App app)
         {
-            m_mainWindow = mainWindow;
+            m_app = app;
         }
 
         public void OnCompleted()
@@ -149,17 +149,17 @@ namespace VolumeControl
 
         public void OnNext(SessionMuteChangedArgs args)
         {
-            m_mainWindow.requestUpdate();
+            m_app.requestUpdate();
         }
     }
 
     public class MasterVolumeListener : IObserver<DeviceVolumeChangedArgs>, IObserver<DeviceMuteChangedArgs>
     {
-        private MainWindow m_mainWindow;
+        private App m_app;
 
-        public MasterVolumeListener(MainWindow mainWindow)
+        public MasterVolumeListener(App app)
         {
-            m_mainWindow = mainWindow;
+            m_app = app;
         }
 
         public void OnCompleted()
@@ -175,13 +175,13 @@ namespace VolumeControl
         public void OnNext(DeviceMuteChangedArgs value)
         {
             Console.WriteLine("Master volume mute changed");
-            m_mainWindow.requestUpdate();
+            m_app.requestUpdate();
         }
 
         public void OnNext(DeviceVolumeChangedArgs value)
         {
             Console.WriteLine("Master volume changed");
-            m_mainWindow.requestUpdate();
+            m_app.requestUpdate();
         }
     }
 }
