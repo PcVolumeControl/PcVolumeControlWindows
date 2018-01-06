@@ -15,7 +15,8 @@ When a client sends a request to update, if it is successful, the server will re
 _Example of the full state update sent by the server:_
 ```json
 {
-    "version": 6,
+    "protocolVersion": 7,
+    "applicationVersion": "v7",
     "deviceIds": {
         "0f4090a9-dee2-4563-ba29-0ad6b93d9e22": "Speakers (Realtek High Definition Audio)",
         "c5a32106-264d-40b2-a2e0-74eda397454c": "Headphones (Rift Audio)",
@@ -94,7 +95,7 @@ You can send one or both volume or mute.
         "masterMuted": true,
         "masterVolume": 95.0
     },
-    "version": 6
+    "version": 7
 }
 ```
 
@@ -112,6 +113,6 @@ _Note: Both Volume AND Mute MUST be provided in session updates!_
             }
         ]
     },
-    "version": 6
+    "version": 7
 }
 ```
