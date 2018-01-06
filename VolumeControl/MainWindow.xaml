@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:VolumeControl"
         mc:Ignorable="d"
         Title="PcVolumeControl"
-        Height="163.973"
+        Height="197.413"
         Width="525"
         Icon="Resources/WindowIcon.bmp"
         WindowStyle="ThreeDBorderWindow">
@@ -19,12 +19,15 @@
         <Label x:Name="server_ip" Content="192.168.1.100" HorizontalAlignment="Right" Margin="0,43,369,0" VerticalAlignment="Top" Width="137"/>
         <Label Content="Port" HorizontalAlignment="Left" Margin="148,12,0,0" VerticalAlignment="Top"/>
         <Button x:Name="start_button" Content="Start" Margin="193,92,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="75" Click="start_button_Click"/>
-        <Label x:Name="server_status" Content="Offline" Margin="0,21,20,0" HorizontalAlignment="Right" Width="69" Height="26" VerticalAlignment="Top"/>
+        <Label x:Name="server_status" Content="Offline" Margin="0,21,20,0" HorizontalAlignment="Right" Width="69" Height="26" VerticalAlignment="Top" FontWeight="Bold"/>
         <Button x:Name="stop_button" Content="Stop" HorizontalAlignment="Left" Margin="289,92,0,0" VerticalAlignment="Top" Width="75" Click="stop_button_Click"/>
         <Button x:Name="exit_button" Content="Exit" HorizontalAlignment="Left" Margin="422,92,0,0" VerticalAlignment="Top" Width="75" Click="exit_button_Click"/>
-        <Label x:Name="version_view" Content="V" Margin="0,0,0,18" HorizontalAlignment="Left" Width="69" Height="26" VerticalAlignment="Bottom"/>
+        <Label x:Name="version_view_protocol" Content="V" Margin="0,0,0,18" HorizontalAlignment="Left" Width="167" Height="26" VerticalAlignment="Bottom"/>
+        <Label x:Name="version_view_app" Content="V" Margin="0,0,0,44" HorizontalAlignment="Left" Width="167" Height="26" VerticalAlignment="Bottom"/>
         <TextBlock VerticalAlignment="Bottom" HorizontalAlignment="Left">
             <Hyperlink RequestNavigate="DownloadLatest_RequestNavigate" NavigateUri="https://github.com/PcVolumeControl/PcVolumeControlWindows/releases/latest">Download latest Version</Hyperlink>
         </TextBlock>
+        <Button x:Name="start_boot_button" Content="Start On Boot" Margin="415,134,10.4,0" VerticalAlignment="Top" Click="start_boot_Click"/>
+        <Button x:Name="stop_boot_button" Content="Remove On Boot" Margin="284,134,116.4,0" VerticalAlignment="Top" Click="stop_boot_Click"/>
     </Grid>
 </Window>

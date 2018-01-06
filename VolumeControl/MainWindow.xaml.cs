@@ -21,13 +21,16 @@ namespace VolumeControl
         {
             InitializeComponent();
 
-            version_view.Content = "V " + App.VERSION;
+            version_view_protocol.Content = "protocol v" + App.PROTOCOL_VERSION;
+            version_view_app.Content = "application v" + App.APP_VERSION;
 
             string ipAddress = App.GetLocalIPAddress();
             server_ip.Content = ipAddress;
             Console.WriteLine("ipAddress: " + ipAddress);
 
             updateConnectionStatus();
+
+            PcVolumeControlUtils.checkVersion();
         }
 
         private void DownloadLatest_RequestNavigate(object sender, RequestNavigateEventArgs e)
@@ -72,6 +75,20 @@ namespace VolumeControl
         private void exit_button_Click(object sender, RoutedEventArgs e)
         {
             System.Windows.Application.Current.Shutdown();
+        }
+
+        private void start_boot_Click(object sender, RoutedEventArgs e)
+        {
+            App.StartOnBoot();
+
+            MessageBox.Show("PcVolumeControl will now automatically start when your computer boots.", "PcVolumeControl", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void stop_boot_Click(object sender, RoutedEventArgs e)
+        {
+            App.RemoveOnBoot();
+
+            MessageBox.Show("PcVolumeControl will no longer start with your computer.", "PcVolumeControl", MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
 }
