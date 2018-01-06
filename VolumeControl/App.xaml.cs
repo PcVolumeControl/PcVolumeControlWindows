@@ -23,8 +23,8 @@ namespace VolumeControl
     /// </summary>
     public partial class App : Application, ClientListener
     {
-        public static string APP_VERSION = "v7";
-        public static int PROTOCOL_VERSION = 6;
+        public static string APPLICATION_VERSION = "v7";
+        public static int PROTOCOL_VERSION = 7;
 
         private static Object m_lock = new Object();
         private static Mutex s_mutex = null;
@@ -342,7 +342,7 @@ namespace VolumeControl
                         Console.WriteLine("client message: " + message);
                         var pcAudio = JsonConvert.DeserializeObject<PcAudio>(message, m_jsonsettings);
 
-                        if (PROTOCOL_VERSION == pcAudio.version)
+                        if (PROTOCOL_VERSION == pcAudio.protocolVersion)
                         {
                             updateState(pcAudio);
                         }
@@ -370,7 +370,8 @@ namespace VolumeControl
                 try
                 {
                     PcAudio audioState = new PcAudio();
-                    audioState.version = PROTOCOL_VERSION;
+                    audioState.protocolVersion = PROTOCOL_VERSION;
+                    audioState.applicationVersion = APPLICATION_VERSION;
 
                     cleanUpSessionKeepers();
 

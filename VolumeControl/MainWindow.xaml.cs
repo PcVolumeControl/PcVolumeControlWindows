@@ -22,7 +22,7 @@ namespace VolumeControl
             InitializeComponent();
 
             version_view_protocol.Content = "protocol v" + App.PROTOCOL_VERSION;
-            version_view_app.Content = "application v" + App.APP_VERSION;
+            version_view_app.Content = "application " + App.APPLICATION_VERSION;
 
             string ipAddress = App.GetLocalIPAddress();
             server_ip.Content = ipAddress;

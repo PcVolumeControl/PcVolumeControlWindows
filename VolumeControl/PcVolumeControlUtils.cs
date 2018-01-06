@@ -28,9 +28,9 @@ namespace VolumeControl
                 {
                     var latest = await getLatestVersion();
 
-                    if (!latest.Name.Equals(App.APP_VERSION, StringComparison.Ordinal))
+                    if (!latest.Name.Equals(App.APPLICATION_VERSION, StringComparison.Ordinal))
                     {
-                        MessageBox.Show("New version avalible:\nLatest: " + latest.Name + "\nCurrent: " + App.APP_VERSION + "\n\nPlease download the latest version.", "PcVolumeControl", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.Show("New version avalible:\nLatest: " + latest.Name + "\nCurrent: " + App.APPLICATION_VERSION + "\n\nPlease download the latest version.", "PcVolumeControl", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                 }
                 catch (Octokit.RateLimitExceededException e)

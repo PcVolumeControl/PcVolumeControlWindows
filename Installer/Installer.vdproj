@@ -21,6 +21,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_1C859033BB5280039EBC4BE19D3AA5CA"
+        "OwnerKey" = "8:_96D278E201924D8F8D019951CA3956C1"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_1F74B0599190E145B7F7B7B20B8672DD"
         "OwnerKey" = "8:_96D278E201924D8F8D019951CA3956C1"
         "MsmSig" = "8:_UNDEFINED"
@@ -93,6 +99,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_9A82C0B7965D1ACDB804E0657D2A59BF"
+        "OwnerKey" = "8:_96D278E201924D8F8D019951CA3956C1"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_A2EDB9640B6B5FC2DD6F80B35114528C"
         "OwnerKey" = "8:_96D278E201924D8F8D019951CA3956C1"
         "MsmSig" = "8:_UNDEFINED"
@@ -107,6 +119,12 @@
         {
         "MsmKey" = "8:_A3E086BF23EB282D5F32F349F53F3F11"
         "OwnerKey" = "8:_96D278E201924D8F8D019951CA3956C1"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_A3E086BF23EB282D5F32F349F53F3F11"
+        "OwnerKey" = "8:_9A82C0B7965D1ACDB804E0657D2A59BF"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -184,7 +202,19 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_9A82C0B7965D1ACDB804E0657D2A59BF"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_5AFD219F0421D73BEE5CAFD15A1D5122"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_1C859033BB5280039EBC4BE19D3AA5CA"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -326,6 +356,37 @@
                     }
                 }
             "SourcePath" = "8:System.Windows.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_01770CE3905B4B09AB8A1EA22D21FBA8"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_1C859033BB5280039EBC4BE19D3AA5CA"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:Hardcodet.Wpf.TaskbarNotification, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                    "_1C859033BB5280039EBC4BE19D3AA5CA"
+                    {
+                    "Name" = "8:Hardcodet.Wpf.TaskbarNotification.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:Hardcodet.Wpf.TaskbarNotification.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_01770CE3905B4B09AB8A1EA22D21FBA8"
@@ -501,6 +562,37 @@
                     }
                 }
             "SourcePath" = "8:System.Reactive.Interfaces.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_01770CE3905B4B09AB8A1EA22D21FBA8"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_9A82C0B7965D1ACDB804E0657D2A59BF"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:Octokit, Version=0.28.0.0, Culture=neutral, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                    "_9A82C0B7965D1ACDB804E0657D2A59BF"
+                    {
+                    "Name" = "8:Octokit.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:Octokit.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_01770CE3905B4B09AB8A1EA22D21FBA8"
@@ -729,15 +821,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:PcVolumeControl"
-        "ProductCode" = "8:{7F4352D8-7375-4CDF-B627-8F7AD43C8BBE}"
-        "PackageCode" = "8:{C45DB8C7-AF4A-47B7-BE22-245424FBDD0A}"
+        "ProductCode" = "8:{D0800FCB-CCFA-4C03-A1CD-3A0329390134}"
+        "PackageCode" = "8:{927DBF0E-0F8B-45BA-994E-1839BCA313CB}"
         "UpgradeCode" = "8:{C2B40E46-86B1-4406-9587-5159C50DBA6A}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.0.3"
+        "ProductVersion" = "8:7.0"
         "Manufacturer" = "8:Dark Rock Studios"
         "ARPHELPTELEPHONE" = "8:False"
         "ARPHELPLINK" = "8:https://github.com/PcVolumeControl"
@@ -1279,7 +1371,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_96D278E201924D8F8D019951CA3956C1"
             {
-            "SourcePath" = "8:..\\VolumeControl\\obj\\Debug\\PcVolumeControl.exe"
+            "SourcePath" = "8:..\\VolumeControl\\obj\\Release\\PcVolumeControl.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_01770CE3905B4B09AB8A1EA22D21FBA8"
