@@ -23,7 +23,7 @@ namespace VolumeControl
     /// </summary>
     public partial class App : Application, ClientListener
     {
-        public static string APPLICATION_VERSION = "v7";
+        public static string APPLICATION_VERSION = "v8";
         public static int PROTOCOL_VERSION = 7;
 
         private static Object m_lock = new Object();
