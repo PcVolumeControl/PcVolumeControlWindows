@@ -342,14 +342,21 @@ namespace VolumeControl
                         Console.WriteLine("client message: " + message);
                         var pcAudio = JsonConvert.DeserializeObject<PcAudio>(message, m_jsonsettings);
 
-                        if (PROTOCOL_VERSION == pcAudio.protocolVersion)
+                        if(pcAudio != null)
                         {
-                            updateState(pcAudio);
+                            if (PROTOCOL_VERSION == pcAudio.protocolVersion)
+                            {
+                                updateState(pcAudio);
+                            }
+                            else
+                            {
+                                Console.WriteLine("Bad version from client. Dropping client.");
+                                tcpClient.Close();
+                            }
                         }
                         else
                         {
-                            Console.WriteLine("Bad version from client. Dropping client.");
-                            tcpClient.Close();
+                            Console.WriteLine("Null message from client.");
                         }
                     }
                     catch (JsonException e)
