@@ -23,7 +23,7 @@ namespace VolumeControl
     /// </summary>
     public partial class App : Application, ClientListener
     {
-        public static string APPLICATION_VERSION = "v8";
+        public static string APPLICATION_VERSION = "v9";
         public static int PROTOCOL_VERSION = 7;
 
         private static Object m_lock = new Object();
@@ -75,10 +75,20 @@ namespace VolumeControl
                 CommandBinding CloseCommandBinding = new CommandBinding(ApplicationCommands.Close, CloseCommandExecuted);
                 CommandManager.RegisterClassCommandBinding(typeof(object), CloseCommandBinding);
 
-                init();
-
-                MainWindow wnd = new MainWindow();
-                wnd.Show();
+                // Get an IP to use when starting up
+                string[] addresses = GetLocalIPAddresses();
+                if (addresses.Length < 2)
+                {
+                    MessageBox.Show("No IPv4 network interfaces found", "PcVolumeControl", MessageBoxButton.OK, MessageBoxImage.Error);
+                } 
+                else
+                {
+                    string address = addresses[0];
+                    init();
+                    Console.WriteLine("Server initialized using IP address: " + address);
+                    MainWindow wnd = new MainWindow();
+                    wnd.Show();
+                }
             }
         }
 
@@ -179,7 +189,8 @@ namespace VolumeControl
             {
                 updateState(null);
 
-                Server = new Server(this);
+                // Initialize listening to 0.0.0.0:3000 (original behavior)
+                Server = new Server(this, IPAddress.Any.ToString(), 3000);
             }).Start();
         }
 
@@ -251,9 +262,9 @@ namespace VolumeControl
             }
         }
 
-        public void startServer()
+        public void startServer(string address, int port)
         {
-            Server = new Server(this);
+            Server = new Server(this, address, port);
         }
 
         public bool stopServer()
@@ -292,17 +303,20 @@ namespace VolumeControl
             m_updateSubject.OnNext(true);
         }
 
-        public static string GetLocalIPAddress()
+        // Get a list of all currently-assigned IPv4 addresses on the box.
+        public static string[] GetLocalIPAddresses()
         {
+            var ips = new List<string>();
+            ips.Add("0.0.0.0"); // a sensible default
             var host = Dns.GetHostEntry(Dns.GetHostName());
             foreach (var ip in host.AddressList)
             {
                 if (ip.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    return ip.ToString();
+                { 
+                    ips.Add(ip.ToString());
                 }
             }
-            throw new Exception("No network adapters with an IPv4 address in the system!");
+            return ips.ToArray();
         }
 
         private void cleanUpSessionKeepers()
