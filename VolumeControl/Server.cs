@@ -18,12 +18,14 @@ namespace VolumeControl
         private bool m_running = false;
         private ASCIIEncoding m_encoder = new ASCIIEncoding();
 
-        public Server(ClientListener clientListener)
+        public Server(ClientListener clientListener, string address, int port)
         {
-            m_tcpListener = new TcpListener(IPAddress.Any, 3000);
+            var parsedAddress = IPAddress.Parse(address);
+            m_tcpListener = new TcpListener(parsedAddress, port);
             listenThread = new Thread(new ThreadStart(ListenForClients));
             listenThread.Start();
             m_clientListener = clientListener;
+            Console.WriteLine("Server listening on address: {0}:{1}", parsedAddress, port);
         }
 
         public bool isRunning()
