@@ -149,5 +149,8 @@
   <ItemGroup>
     <ProjectReference Include="..\VolumeControl\PcVolumeControl.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
   <Import Project="$(WapProjPath)\Microsoft.DesktopBridge.targets" />
 </Project>

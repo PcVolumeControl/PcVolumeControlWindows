@@ -25,8 +25,10 @@ namespace VolumeControl
 
         public void Dispose()
         {
-            m_volumeSubscription.Dispose();
-            m_muteSubscription.Dispose();
+            // Guarded so repeated disposal (e.g. via both the SessionDisconnected
+            // event and updateState cleanup) is safe.
+            m_volumeSubscription?.Dispose();
+            m_muteSubscription?.Dispose();
 
             m_volumeSubscription = null;
             m_muteSubscription = null;

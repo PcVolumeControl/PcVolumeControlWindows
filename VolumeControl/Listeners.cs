@@ -25,6 +25,9 @@ namespace VolumeControl
 
         public void OnNext(string sessionId)
         {
+            // Dispose the keeper immediately rather than waiting for the next
+            // updateState() poll to notice the session is gone.
+            m_app.removeSessionKeeper(sessionId);
             m_app.requestUpdate();
         }
     }
@@ -78,7 +81,9 @@ namespace VolumeControl
             switch (value.ChangedType)
             {
                 case DeviceChangedType.DefaultChanged:
-                    m_app.requestUpdate();
+                    // Rebind per-device subscriptions to the new default device,
+                    // then refresh state.
+                    m_app.onDefaultDeviceChanged();
                     break;
                 case DeviceChangedType.DeviceAdded:
                     m_app.requestUpdate();
