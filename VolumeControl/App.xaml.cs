@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
@@ -44,6 +45,13 @@ namespace VolumeControl
 
         private AudioSessionVolumeListener m_sessionVolumeListener;
         private AudioSessionMuteListener m_sessionMuteListener;
+
+        // Subscriptions that live for the whole app lifetime (disposed on exit).
+        private CompositeDisposable m_lifetimeSubscriptions = new CompositeDisposable();
+        // Subscriptions bound to the current default playback device. Re-created
+        // whenever the default device changes so we don't leak the old device's
+        // event subscriptions.
+        private CompositeDisposable m_deviceSubscriptions = new CompositeDisposable();
 
         public static App instance
         {
@@ -113,6 +121,7 @@ namespace VolumeControl
         private void Application_Exit(object sender, ExitEventArgs e)
         {
             stopServer();
+            cleanup();
         }
 
         private void OpenCommandExecuted(object target, ExecutedRoutedEventArgs e)
@@ -160,30 +169,24 @@ namespace VolumeControl
         private void init()
         {
             m_updateListener = new UpdateListener(this);
-            m_updateSubject
-                .Synchronize()
-                .Throttle(TimeSpan.FromMilliseconds(10))
-                .SubscribeOnDispatcher()
-                .Subscribe(m_updateListener);
+            m_lifetimeSubscriptions.Add(
+                m_updateSubject
+                    .Synchronize()
+                    .Throttle(TimeSpan.FromMilliseconds(10))
+                    .SubscribeOnDispatcher()
+                    .Subscribe(m_updateListener));
 
             m_sessionVolumeListener = new AudioSessionVolumeListener(this);
             m_sessionMuteListener = new AudioSessionMuteListener(this);
 
             m_coreAudioController = new CoreAudioController();
 
-            m_coreAudioController.DefaultPlaybackDevice.SessionController.SessionCreated.Subscribe(new AudioSessionAddedListener(this));
-            m_coreAudioController.DefaultPlaybackDevice.SessionController.SessionDisconnected.Subscribe(new AudioSessionRemovedListener(this));
-            m_coreAudioController.AudioDeviceChanged.Subscribe(new DeviceChangeListener(this));
+            // Controller-level subscription, lives for the whole app lifetime.
+            m_lifetimeSubscriptions.Add(
+                m_coreAudioController.AudioDeviceChanged.Subscribe(new DeviceChangeListener(this)));
 
-            MasterVolumeListener masterVolumeListener = new MasterVolumeListener(this);
-
-            m_coreAudioController.DefaultPlaybackDevice.VolumeChanged
-                                //.Throttle(TimeSpan.FromMilliseconds(10))
-                                .Subscribe(masterVolumeListener);
-
-            m_coreAudioController.DefaultPlaybackDevice.MuteChanged
-                                //.Throttle(TimeSpan.FromMilliseconds(10))
-                                .Subscribe(masterVolumeListener);
+            // Per-device subscriptions, (re)bound to the current default device.
+            subscribeToDefaultDevice();
 
             new Thread(() =>
             {
@@ -192,6 +195,72 @@ namespace VolumeControl
                 // Initialize listening to 0.0.0.0:3000 (original behavior)
                 Server = new Server(this, IPAddress.Any.ToString(), 3000);
             }).Start();
+        }
+
+        // (Re)subscribe to events on the current default playback device. Any
+        // subscriptions bound to a previous default device are disposed first so
+        // switching audio devices doesn't leak event subscriptions.
+        private void subscribeToDefaultDevice()
+        {
+            // Clear() disposes the contained subscriptions but keeps the
+            // CompositeDisposable usable for the new ones.
+            m_deviceSubscriptions.Clear();
+
+            CoreAudioDevice defaultDevice = m_coreAudioController.DefaultPlaybackDevice;
+            if (defaultDevice == null)
+            {
+                return;
+            }
+
+            m_deviceSubscriptions.Add(
+                defaultDevice.SessionController.SessionCreated.Subscribe(new AudioSessionAddedListener(this)));
+            m_deviceSubscriptions.Add(
+                defaultDevice.SessionController.SessionDisconnected.Subscribe(new AudioSessionRemovedListener(this)));
+
+            MasterVolumeListener masterVolumeListener = new MasterVolumeListener(this);
+            m_deviceSubscriptions.Add(defaultDevice.VolumeChanged.Subscribe(masterVolumeListener));
+            m_deviceSubscriptions.Add(defaultDevice.MuteChanged.Subscribe(masterVolumeListener));
+        }
+
+        // Called when the default playback device changes. Rebinds the per-device
+        // subscriptions to the new device and refreshes state.
+        public void onDefaultDeviceChanged()
+        {
+            subscribeToDefaultDevice();
+            requestUpdate();
+        }
+
+        // Dispose and forget the keeper for a session that has gone away. Driven
+        // by the SessionDisconnected event so cleanup doesn't depend solely on
+        // updateState() being called.
+        public void removeSessionKeeper(string sessionId)
+        {
+            lock (m_lock)
+            {
+                if (m_sessions.TryGetValue(sessionId, out AudioSessionKeeper keeper))
+                {
+                    keeper.Dispose();
+                    m_sessions.Remove(sessionId);
+                }
+            }
+        }
+
+        // Tear down all long-lived resources on application exit.
+        private void cleanup()
+        {
+            m_deviceSubscriptions?.Dispose();
+            m_lifetimeSubscriptions?.Dispose();
+
+            lock (m_lock)
+            {
+                foreach (var keeper in m_sessions.Values)
+                {
+                    keeper.Dispose();
+                }
+                m_sessions.Clear();
+            }
+
+            m_coreAudioController?.Dispose();
         }
 
         private class UpdateListener : IObserver<bool>
@@ -272,7 +341,7 @@ namespace VolumeControl
             bool stopped = false;
             if (Server != null)
             {
-                Server.stop();
+                Server.Dispose();
                 Server = null;
 
                 stopped = true;
