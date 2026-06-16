@@ -274,10 +274,10 @@
             "ComponentsUrl" = "8:"
                 "Items"
                 {
-                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.6.1"
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.8"
                     {
-                    "Name" = "8:Microsoft .NET Framework 4.6.1 (x86 and x64)"
-                    "ProductCode" = "8:.NETFramework,Version=v4.6.1"
+                    "Name" = "8:Microsoft .NET Framework 4.8 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.8"
                     }
                 }
             }
@@ -306,10 +306,10 @@
             "ComponentsUrl" = "8:"
                 "Items"
                 {
-                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.6.1"
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.8"
                     {
-                    "Name" = "8:Microsoft .NET Framework 4.6.1 (x86 and x64)"
-                    "ProductCode" = "8:.NETFramework,Version=v4.6.1"
+                    "Name" = "8:Microsoft .NET Framework 4.8 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.8"
                     }
                 }
             }
@@ -334,7 +334,7 @@
                 {
                 "Name" = "8:.NET Framework"
                 "Message" = "8:[VSDNETMSG]"
-                "FrameworkVersion" = "8:.NETFramework,Version=v4.6.1"
+                "FrameworkVersion" = "8:.NETFramework,Version=v4.8"
                 "AllowLaterVersions" = "11:FALSE"
                 "InstallUrl" = "8:http://go.microsoft.com/fwlink/?LinkId=671728"
                 }
@@ -821,7 +821,7 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:PcVolumeControl"
-        "ProductCode" = "8:{D0800FCB-CCFA-4C03-A1CD-3A0329390134}"
+        "ProductCode" = "8:{343BA9C2-700C-412A-8E54-84374E6609C3}"
         "PackageCode" = "8:{927DBF0E-0F8B-45BA-994E-1839BCA313CB}"
         "UpgradeCode" = "8:{C2B40E46-86B1-4406-9587-5159C50DBA6A}"
         "AspNetVersion" = "8:4.0.30319.0"
@@ -829,7 +829,7 @@
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:7.0"
+        "ProductVersion" = "8:9.0"
         "Manufacturer" = "8:Dark Rock Studios"
         "ARPHELPTELEPHONE" = "8:False"
         "ARPHELPLINK" = "8:https://github.com/PcVolumeControl"
