@@ -11,9 +11,8 @@
 
 This is the original Windows component of the PcVolumeControl project. It is the server that handles communication with the clients as well as modification of the PC's actual volume settings.
 
-The protocol description below is out of date (its client message examples use a `version` field that the server rejects). The current specification is
-[docs/PROTOCOL.md](https://github.com/PcVolumeControl/PcVolumeControlServer/blob/main/docs/PROTOCOL.md)
-in the new repository.
+The protocol description below is out of date (its client message examples use a `version` field that the server rejects). The current specification is in
+[PcVolumeControlProtocol](https://github.com/PcVolumeControl/PcVolumeControlProtocol).
 
 # Client/Server Protocol
 The protocol for interacting with the Windows server is as follows:
