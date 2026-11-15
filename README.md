@@ -1,5 +1,19 @@
 # PcVolumeControlWindows
-This is the Windows component of the PcVolumeControl project. It is the server that handles communication with the clients as well as modification of the PC's actualy volume settings.
+
+> **Deprecated.** This C# server is no longer developed. It is replaced by
+> [PcVolumeControlServer](https://github.com/PcVolumeControl/PcVolumeControlServer),
+> a rewrite that runs on Windows and Linux and adds a built-in mixer,
+> application icons and update checks. New installs should use it; see its
+> README for how to install.
+>
+> The releases of this server stay available and keep working with the
+> PcVolumeControl apps.
+
+This is the original Windows component of the PcVolumeControl project. It is the server that handles communication with the clients as well as modification of the PC's actual volume settings.
+
+The protocol description below is out of date (its client message examples use a `version` field that the server rejects). The current specification is
+[docs/PROTOCOL.md](https://github.com/PcVolumeControl/PcVolumeControlServer/blob/main/docs/PROTOCOL.md)
+in the new repository.
 
 # Client/Server Protocol
 The protocol for interacting with the Windows server is as follows:
